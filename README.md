@@ -137,8 +137,12 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 
 - [x] Implement VirusTotal IP Lookup script via API
 - [x] Implement ipinfo.io IP Lookup script via API
-- [ ] Implement Cisco Talos IP Reputation Lookup script via web scraping?
 - [ ] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
 - [ ] Main file to run all scripts together
 - [ ] SIEM integration (not public)
 - [ ] Excel user attributes query (not public)
+
+## Not Feasible
+
+- [ ] Implement Cisco Talos IP Reputation Lookup script via web scraping (no API, uses Cloudflare protection)
+- [ ] Implement IBM X-Force IP Reputation Lookup script via web scraping (API only lasts for 30 days)
