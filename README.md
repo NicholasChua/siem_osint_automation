@@ -8,6 +8,7 @@ This project was tested on Python 3.12.3.
 
 - Python 3.12+
 - VirusTotal API key (free tier is sufficient)
+- ipinfo.io API key (free tier is sufficient)
 - secrets.json file containing API keys
 
 ## File Structure
@@ -22,8 +23,10 @@ I assume the following file structure:
 ├───requirements.txt
 ├───LICENSE
 ├───ip_osint_json
-│   └───vt_ip_lookup.json (Output from vt_ip_osint.py)
+│   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
+|   └───ii_ip_lookup.json (Output from ipinfo_ip_osint.py)
 ├───vt_ip_osint.py
+├───ipinfo_ip_osint.py
 └───secrets.json
 ```
 
@@ -45,7 +48,8 @@ pip install -r requirements.txt
 
 ```json
 {
-    "vt_api_key": "YOUR VIRUSTOTAL API KEY"
+    "vt_api_key": "YOUR VIRUSTOTAL API KEY",
+    "ip_info_api_key": "YOUR IPINFO API KEY"
 }
 ```
 
