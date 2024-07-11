@@ -5,9 +5,13 @@ import os
 import re
 
 # Read secrets.json and import the API key
-with open("secrets.json") as f:
-    secrets = json.load(f)
-    vt_api_key = secrets["vt_api_key"]
+try:
+    with open("secrets.json") as f:
+        secrets = json.load(f)
+        vt_api_key = secrets["vt_api_key"]
+except:
+    print("Error reading secrets.json. Please ensure the file exists and the API key is correct.")
+    exit(1)
 
 
 def vt_ip_lookup(input_ip: str, json_dir: str = "ip_osint_json", json_file: str = "vt_ip_lookup.json") -> bool:
