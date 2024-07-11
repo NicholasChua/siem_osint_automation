@@ -127,6 +127,12 @@ python ii_ip_osint.py --ip 8.8.8.8
 
 The script will output `ii_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
 
+## Video Demo
+
+Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
+
+[![SIEM OSINT Automation Project (SOAP) Demo](https://img.youtube.com/vi/DuhtSVKlpxA/0.jpg)](https://www.youtube.com/watch?v=DuhtSVKlpxA)
+
 ## To Do
 
 - [x] Implement VirusTotal IP Lookup script via API
