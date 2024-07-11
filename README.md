@@ -117,12 +117,12 @@ python vt_ip_osint.py --ip 8.8.8.8
 
 The script will output `vt_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
-### `ipinfo_ip_osint.py`
+### `ii_ip_osint.py`
 
 This script takes in IP addresses as input and queries ipinfo.io for information on the IP addresses. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. city, region, org, country) and return it to the user.
 
 ```bash
-python ipinfo_ip_osint.py --ip 8.8.8.8
+python ii_ip_osint.py --ip 8.8.8.8
 ```
 
 The script will output `ii_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
