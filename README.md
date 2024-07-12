@@ -67,9 +67,9 @@ I assume the following file structure:
 ├───LICENSE
 ├───ip_osint_json
 │   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
-│   └───ii_ip_lookup.json (Output from ipinfo_ip_osint.py)
+│   └───ii_ip_lookup.json (Output from ii_ip_osint.py)
 ├───vt_ip_osint.py
-├───ipinfo_ip_osint.py
+├───ii_ip_osint.py
 └───secrets.json
 ```
 
