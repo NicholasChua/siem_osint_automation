@@ -77,13 +77,11 @@ def ii_check_ip(
 
     # Return the timestamp and details as a dictionary with the key ipinfo_ip_osint
     return {
-        "ipinfo_ip_osint": {
-            "ip": ip,
-            "city": city,
-            "region": region,
-            "organization": org,
-            "country": country_name,
-        },
+        "ip": ip,
+        "city": city,
+        "region": region,
+        "organization": org,
+        "country": country_name,
     }
 
 

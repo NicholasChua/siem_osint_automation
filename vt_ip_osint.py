@@ -105,11 +105,9 @@ def vt_check_ip(
 
     # Return details as a dictionary with key virustotal_ip_osint
     return {
-        "virustotal_ip_osint": {
-            "ip": ip,
-            "vendors_detected_malicious": vendors_detected_malicious,
-            "num_vendors_detected_malicious": num_vendors_detected_malicious,
-        },
+        "ip": ip,
+        "vendors_detected_malicious": vendors_detected_malicious,
+        "num_vendors_detected_malicious": num_vendors_detected_malicious,
     }
 
 
