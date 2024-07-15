@@ -167,7 +167,6 @@ def main():
         print(
             "No response directory provided. Using default directory 'ip_osint_json'."
         )
-        # TODO: Add this to the rest of the decision tree
         ii_data = ii_check_ip(response_json_file=response_file)
         print(ii_data)
     # If only the response directory is provided, print an error
