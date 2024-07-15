@@ -2,7 +2,7 @@ import json
 import requests
 import argparse
 import os
-import re
+import ipaddress
 
 # Read secrets.json and import the API key
 try:
@@ -26,9 +26,9 @@ def vt_ip_lookup(
     If the API call is unsuccessful or the file write fails, the function returns False.
 
     Args:
-    input_ip (str): The IP address to look up.
-    json_dir (str): The directory to save the JSON response file. Default is "ip_osint_json".
-    json_file (str): The filename of the JSON response file. Default is "ip_lookup.json".
+    input_ip: The IP address to look up.
+    json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
+    json_file: The filename of the JSON response file. Default is "ip_lookup.json".
 
     Returns:
     bool: True if the API call was successful, False otherwise.
@@ -57,15 +57,15 @@ def vt_ip_lookup(
 def vt_check_ip(
     response_json_dir: str = "ip_osint_json",
     response_json_file: str = "vt_ip_lookup.json",
-):
+) -> dict:
     """Function to check the response from a VirusTotal IP lookup for vendors that detected the IP address as malicious.
 
     Args:
-    response_json_dir (str): The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
-    response_json_file (str): The filename of the JSON response from the VirusTotal IP lookup. Default is "vt_ip_lookup.json".
+    response_json_dir: The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
+    response_json_file: The filename of the JSON response from the VirusTotal IP lookup. Default is "vt_ip_lookup.json".
 
     Returns:
-    None
+    dict: A dictionary containing the vendors that detected the IP address as malicious and number of vendors from the JSON response.
     """
     # Form the file path to read
     response_json_dir_file = os.path.join(response_json_dir, response_json_file)
@@ -75,41 +75,67 @@ def vt_check_ip(
     # Initialize list of vendors that detected the IP address as malicious
     vendors_detected_malicious = []
 
-    print(f"IP Address: {response['data']['id']}")
+    # Print the IP address
+    ip = response["data"]["id"]
+
+    # Get total number of vendors based on last_analysis_stats
+    total_vendors = (
+        response["data"]["attributes"]["last_analysis_stats"]["malicious"]
+        + response["data"]["attributes"]["last_analysis_stats"]["suspicious"]
+        + response["data"]["attributes"]["last_analysis_stats"]["undetected"]
+        + response["data"]["attributes"]["last_analysis_stats"]["harmless"]
+        + response["data"]["attributes"]["last_analysis_stats"]["timeout"]
+    )
 
     # Update list of vendors that detected the IP address as malicious
     for vendor in response["data"]["attributes"]["last_analysis_results"]:
         if (
             response["data"]["attributes"]["last_analysis_results"][vendor]["result"]
             == "malicious"
+            or response["data"]["attributes"]["last_analysis_results"][vendor]["result"]
+            == "malware"
         ):
             vendors_detected_malicious.append(vendor)
 
-    # Print the list of vendors that detected the IP address as malicious
+    # Set the count of vendors that detected the IP address as malicious
     if vendors_detected_malicious:
-        print(
-            f"The following VT vendors detected this IP address as malicious: {', '.join(vendors_detected_malicious)}"
-        )
+        num_vendors_detected_malicious = (f"{len(vendors_detected_malicious)}/{total_vendors}")
     else:
-        print("No VT vendors detected this IP address as malicious.")
+        num_vendors_detected_malicious = (f"0/{total_vendors}")
+
+    # Return details as a dictionary with key virustotal_ip_osint
+    return {
+        "virustotal_ip_osint": {
+            "ip": ip,
+            "vendors_detected_malicious": vendors_detected_malicious,
+            "num_vendors_detected_malicious": num_vendors_detected_malicious,
+        },
+    }
 
 
-def regex_ip_verification(input_ip: str) -> bool:
-    """Helper function to verify that the input IP address is in the correct format using regex.
+def nice_print_vt_ip_osint(ip_osint: dict) -> None:
+    """Function to print the IP OSINT details in a user-friendly format. This is necessary if the user runs this script directly.
 
     Args:
-    input_ip (str): The IP address to verify.
+    ip_osint: A dictionary containing the IP OSINT details from vt_check_ip().
 
     Returns:
-    bool: True if the IP address is in the correct format, False otherwise.
+    None
     """
-    # Regular expression for an IP address
-    ip_regex = r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
-    # Check if the input IP address matches the regular expression
-    if re.match(ip_regex, input_ip):
-        return True
+    # Print the IP OSINT details
+    print(f"IP Address: {ip_osint['virustotal_ip_osint']['ip']}")
+    
+    # Check for vendors that detected the IP address as malicious
+    if ip_osint['virustotal_ip_osint']['vendors_detected_malicious']:
+        print(
+            f"The following VT vendors detected this IP Address as malicious: {', '.join(ip_osint['virustotal_ip_osint']['vendors_detected_malicious'])}"
+        )
     else:
-        return False
+        print("No VT vendors detected this IP Address as malicious.")
+
+    print(
+        f"VT vendors that detected this IP Address as malicious: {ip_osint['virustotal_ip_osint']['num_vendors_detected_malicious']}"
+    )
 
 
 def main():
@@ -145,10 +171,12 @@ def main():
     response_file = args.response_file
     response_dir = args.response_dir
 
-    # Perform input validation
+    # Perform input validation of IP address using built-in ipaddress module
     if ip_address:
-        if not regex_ip_verification(ip_address):
-            print("Invalid IP address format. Please provide a valid IP address.")
+        try:
+            ipaddress.ip_address(ip_address)
+        except ValueError:
+            print("Invalid IP address. Please provide a valid IP address.")
             exit(1)
 
     # Decision tree for the arguments
@@ -160,18 +188,21 @@ def main():
         lookup_ip_success = False
         lookup_ip_success = vt_ip_lookup(input_ip=ip_address)
         if lookup_ip_success:
-            vt_check_ip(response_json_file="vt_ip_lookup.json")
+            vt_data = vt_check_ip(response_json_file="vt_ip_lookup.json")
+            nice_print_vt_ip_osint(vt_data)
         else:
             print("Error with the VirusTotal API call.")
     # If both the response file and directory are provided, use them
     elif response_file and response_dir:
-        vt_check_ip(response_json_file=response_file, response_json_dir=response_dir)
+        vt_data = vt_check_ip(response_json_file=response_file, response_json_dir=response_dir)
+        nice_print_vt_ip_osint(vt_data)
     # If only the response file is provided, use the default directory
     elif response_file and not response_dir:
         print(
             "No response directory provided. Using default directory 'ip_osint_json'."
         )
-        vt_check_ip(response_json_file=response_file)
+        vt_data = vt_check_ip(response_json_file=response_file)
+        nice_print_vt_ip_osint(vt_data)
     # If only the response directory is provided, print an error
     elif response_dir and not response_file:
         print(

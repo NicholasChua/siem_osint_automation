@@ -1,5 +1,5 @@
 import argparse
-import re
+import ipaddress
 import ipinfo
 import json
 import os
@@ -22,9 +22,9 @@ def ii_ip_lookup(
     """Function to lookup an IP address on IPinfo and print the response.
 
     Args:
-    input_ip (str): The IP address to look up.
-    json_dir (str): The directory to save the JSON response file. Default is "ip_osint_json".
-    json_file (str): The filename of the JSON response file. Default is "ii_ip_lookup.json".
+    input_ip: The IP address to look up.
+    json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
+    json_file: The filename of the JSON response file. Default is "ii_ip_lookup.json".
 
     Returns:
     bool: True if the API call was successful, False otherwise.
@@ -53,50 +53,55 @@ def ii_ip_lookup(
 def ii_check_ip(
     response_json_dir: str = "ip_osint_json",
     response_json_file: str = "ii_ip_lookup.json",
-):
+) -> dict:
     """Function to check the response from a VirusTotal IP lookup for vendors that detected the IP address as malicious.
 
     Args:
-    response_json_dir (str): The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
-    response_json_file (str): The filename of the JSON response from the VirusTotal IP lookup. Default is "ii_ip_lookup.json".
+    response_json_dir: The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
+    response_json_file: The filename of the JSON response from the VirusTotal IP lookup. Default is "ii_ip_lookup.json".
 
     Returns:
-    None
+    dict: A dictionary containing the timestamp and details of the IP address from the JSON response.
     """
     # Form the file path to read
     response_json_dir_file = os.path.join(response_json_dir, response_json_file)
     with open(response_json_dir_file) as f:
         response = json.load(f)
 
-    # Get the city, region, org, country_name from the JSON response
+    # Get the ip, city, region, org, country_name from the JSON response
+    ip = response["ip"]
     city = response["city"]
     region = response["region"]
     org = response["org"]
     country_name = response["country_name"]
 
-    # Print the details
-    print(f"City: {city}")
-    print(f"Region: {region}")
-    print(f"Organization: {org}")
-    print(f"Country: {country_name}")
+    # Return the timestamp and details as a dictionary with the key ipinfo_ip_osint
+    return {
+        "ipinfo_ip_osint": {
+            "ip": ip,
+            "city": city,
+            "region": region,
+            "organization": org,
+            "country": country_name,
+        },
+    }
 
 
-def regex_ip_verification(input_ip: str) -> bool:
-    """Helper function to verify that the input IP address is in the correct format using regex.
+def nice_print_ii_ip_osint(ip_osint: dict) -> None:
+    """Function to print the IP address details in a nice format.
 
     Args:
-    input_ip (str): The IP address to verify.
+    ip_osint: A dictionary containing the timestamp and details of the IP address from the JSON response.
 
     Returns:
-    bool: True if the IP address is in the correct format, False otherwise.
+    None
     """
-    # Regular expression for an IP address
-    ip_regex = r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
-    # Check if the input IP address matches the regular expression
-    if re.match(ip_regex, input_ip):
-        return True
-    else:
-        return False
+    # Print the IP address details
+    print(f"IP Address: {ip_osint['ipinfo_ip_osint']['ip']}")
+    print(f"City: {ip_osint['ipinfo_ip_osint']['city']}")
+    print(f"Region: {ip_osint['ipinfo_ip_osint']['region']}")
+    print(f"Organization: {ip_osint['ipinfo_ip_osint']['organization']}")
+    print(f"Country: {ip_osint['ipinfo_ip_osint']['country']}")
 
 
 def main():
@@ -132,10 +137,12 @@ def main():
     response_file = args.response_file
     response_dir = args.response_dir
 
-    # Perform input validation
+    # Perform input validation of IP address using built-in ipaddress module
     if ip_address:
-        if not regex_ip_verification(ip_address):
-            print("Invalid IP address format. Please provide a valid IP address.")
+        try:
+            ipaddress.ip_address(ip_address)
+        except ValueError:
+            print("Invalid IP address. Please provide a valid IP address.")
             exit(1)
 
     # Decision tree for the arguments
@@ -147,18 +154,22 @@ def main():
         lookup_ip_success = False
         lookup_ip_success = ii_ip_lookup(input_ip=ip_address)
         if lookup_ip_success:
-            ii_check_ip(response_json_file="ii_ip_lookup.json")
+            ii_data = ii_check_ip(response_json_file="ii_ip_lookup.json")
+            nice_print_ii_ip_osint(ii_data)
         else:
             print("Error with the ipinfo API call.")
     # If both the response file and directory are provided, use them
     elif response_file and response_dir:
-        ii_check_ip(response_json_file=response_file, response_json_dir=response_dir)
+        ii_data = ii_check_ip(response_json_file=response_file, response_json_dir=response_dir)
+        nice_print_ii_ip_osint(ii_data)
     # If only the response file is provided, use the default directory
     elif response_file and not response_dir:
         print(
             "No response directory provided. Using default directory 'ip_osint_json'."
         )
-        ii_check_ip(response_json_file=response_file)
+        # TODO: Add this to the rest of the decision tree
+        ii_data = ii_check_ip(response_json_file=response_file)
+        print(ii_data)
     # If only the response directory is provided, print an error
     elif response_dir and not response_file:
         print(
