@@ -9,6 +9,7 @@ This project was tested on Python 3.12.3.
 - Python 3.12+
 - VirusTotal API key (free tier is sufficient)
 - ipinfo.io API key (free tier is sufficient)
+- AbuseIPDB API key (free tier is sufficient)
 - secrets.json file containing API keys
 
 ## How to Get API Keys
@@ -31,11 +32,15 @@ This project was tested on Python 3.12.3.
 
 1. Register for a free IPinfo account: [https://ipinfo.io/signup](https://ipinfo.io/signup).
 
-![alt text](readme_media/ii_signup.png)
+![ipinfo Sign Up Page](readme_media/ii_signup.png)
 
 2. Once logged in and on the [home page](https://ipinfo.io/account/home), scroll down to `Step 3: Get your token`, and click on `Copy` to copy your API key.
 
-![alt text](readme_media/ii_api_key.png)
+![ipinfo API Key](readme_media/ii_api_key.png)
+
+### AbuseIPDB
+
+Instructions to be added.
 
 ### secrets.json
 
@@ -46,11 +51,12 @@ This project was tested on Python 3.12.3.
 ```json
 {
     "vt_api_key": "YOUR VIRUSTOTAL API KEY",
-    "ip_info_api_key": "YOUR IPINFO API KEY"
+    "ip_info_api_key": "YOUR IPINFO API KEY",
+    "aipdb_key": "YOUR ABUSE IPDB API KEY"
 }
 ```
 
-2. Replace `YOUR VIRUSTOTAL API KEY` and `YOUR IPINFO API KEY` with the respective API keys you obtained in the previous steps.
+2. Replace `YOUR VIRUSTOTAL API KEY`, `YOUR IPINFO API KEY`, `YOUR ABUSE IPDB API KEY` with the respective API keys you obtained in the previous steps.
 
 3. Ensure that the `secrets.json` file is in the root directory of the project.
 
@@ -65,11 +71,17 @@ I assume the following file structure:
 ├───README.md
 ├───requirements.txt
 ├───LICENSE
+├───common
+│   ├───helper_functions.py
+│   └───__init__.py
 ├───ip_osint_json
 │   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
 │   └───ii_ip_lookup.json (Output from ii_ip_osint.py)
+│   └───ai_ip_lookup.json (Output from ai_ip_osint.py)
 ├───vt_ip_osint.py
 ├───ii_ip_osint.py
+├───ai_ip_osint.py
+├───comment.py
 └───secrets.json
 ```
 
@@ -127,6 +139,16 @@ python ii_ip_osint.py --ip 8.8.8.8
 
 The script will output `ii_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
 
+### `ai_ip_osint.py`
+
+This script takes in IP addresses as input and queries AbuseIPDB for information on the IP addresses. The script then outputs the response to the console. The script will output the IP address, the number of reports, the abuse confidence score, and the country code.
+
+```bash
+python ai_ip_osint.py --ip 8.8.8.8
+```
+
+The script will output `ai_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full AbuseIPDB response. Note that the output file is overwritten each time the script is run.
+
 ### `comment.py`
 
 This script is essentially a template for combining both `vt_ip_osint.py` and `ii_ip_osint.py` scripts together, and generating a series of comments. This script is at an early stage of development, and full error handling and testing have not been conducted.
@@ -145,12 +167,17 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 
 - [x] Implement VirusTotal IP Lookup script via API
 - [x] Implement ipinfo.io IP Lookup script via API
-- [ ] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
-- [ ] Main file to run all scripts together
-- [ ] SIEM integration (not public)
-- [ ] Excel user attributes query (not public)
+- [x] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
+- [x] Main file to run all scripts together (currently up to AbuseIPDB)
+- [x] Implement AbuseIPDB IP Reputation Lookup script via API
+- [ ] Implement haveibeenpwned.com Email Lookup script via API
 
 ## Not Feasible
 
 - [ ] Implement Cisco Talos IP Reputation Lookup script via web scraping (no API, uses Cloudflare protection)
 - [ ] Implement IBM X-Force IP Reputation Lookup script via web scraping (API only lasts for 30 days)
+
+## Excluded
+
+- [ ] SIEM integration (not public)
+- [ ] Excel user attributes query (not public)

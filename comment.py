@@ -3,14 +3,16 @@ import datetime
 import ipaddress
 import vt_ip_osint as vt
 import ii_ip_osint as ii
+import ai_ip_osint as ai
 
 
-def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}) -> str:
-    """Function to format the IP OSINT details from VirusTotal and ipinfo into a comment.
+def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: dict = {}) -> str:
+    """Function to format the IP OSINT details from VirusTotal, ipinfo.io and AbuseIPDB into a comment.
 
     Args:
     vt_ip_osint: A dictionary containing the IP OSINT details from vt_check_ip(). Default is an empty dictionary.
     ii_ip_osint: A dictionary containing the IP OSINT details from ii_check_ip(). Default is an empty dictionary.
+    ai_ip_osint: A dictionary containing the IP OSINT details from ai_check_ip(). Default is an empty dictionary.
 
     Returns:
     str: A formatted comment with the IP OSINT details. Each detail is on a new line with a '- ' prefix and ends with a newline character.
@@ -26,9 +28,9 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}) -> str:
     # Initialize the comment list with the timestamp
     comment += [f"- Analyzed at {timestamp}."]
 
-    # Check for presence of filled vt_ip_osint and ii_ip_osint
-    if vt_ip_osint == {} and ii_ip_osint == {}:
-        raise Exception("Both VirusTotal and ipinfo IP OSINT dictionaries are empty.")
+    # Check for presence of filled vt_ip_osint, ii_ip_osint, and ai_ip_osint dictionaries
+    if vt_ip_osint == {} and ii_ip_osint == {} and ai_ip_osint == {}:
+        raise Exception("VirusTotal, ipinfo IP OSINT, and AbuseIPDB dictionaries are empty.")
 
     if vt_ip_osint:
         try:
@@ -56,6 +58,25 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}) -> str:
             comment += [f"- IP belongs to: {ii_ip_osint['organization']}"]
         except KeyError:
             print("Missing key in ii_ip_osint. Assuming it is empty.")
+            pass
+        except:
+            # TODO: Handle the exception
+            print("Error in ii_ip_osint.")
+            exit(1)
+
+    if ai_ip_osint:
+        try:
+            comment += [f"- AbuseIPDB Link: https://www.abuseipdb.com/check/{ai_ip_osint['ip']}"]
+            comment += [f"- Abuse Confidence Score: {ai_ip_osint['abuseConfidenceScore']}"]
+            
+            # Print an appropriate message based on the isTor value
+            if ai_ip_osint["isTor"]:
+                comment += ["- IP is a Tor exit node."]
+            else:
+                comment += ["- IP is not a Tor exit node."]
+
+        except KeyError:
+            print("Missing key in ai_ip_osint. Assuming it is empty.")
             pass
         except:
             # TODO: Handle the exception
@@ -96,6 +117,7 @@ def main():
     # Perform the IP lookups
     success_vt = vt.vt_ip_lookup(input_ip=ip_address)
     success_ii = ii.ii_ip_lookup(input_ip=ip_address)
+    success_ai = ai.ai_ip_lookup(input_ip=ip_address)
 
     # If the lookups are successful, proceed to checks and save results in dictionaries
     # Otherwise, leave dictionaries empty to indicate failure
@@ -107,9 +129,13 @@ def main():
         ii_ip_osint = ii.ii_check_ip()
     else:
         ii_ip_osint = {}
+    if success_ai:
+        ai_ip_osint = ai.ai_check_ip()
+    else:
+        ai_ip_osint = {}
 
     # Pass the dictionaries to the format_comment function
-    comment = format_comment(vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint)
+    comment = format_comment(vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint, ai_ip_osint=ai_ip_osint)
     print(comment)
 
 
