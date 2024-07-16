@@ -75,7 +75,7 @@ def ii_check_ip(
     org = response["org"]
     country_name = response["country_name"]
 
-    # Return the timestamp and details as a dictionary with the key ipinfo_ip_osint
+    # Return the timestamp and details as a dictionary
     return {
         "ip": ip,
         "city": city,
@@ -86,7 +86,7 @@ def ii_check_ip(
 
 
 def nice_print_ii_ip_osint(ip_osint: dict) -> None:
-    """Function to print the IP address details in a nice format.
+    """Function to print the IP address details in a nice format. This is necessary if the user runs this script directly.
 
     Args:
     ip_osint: A dictionary containing the timestamp and details of the IP address from the JSON response.
@@ -166,7 +166,7 @@ def main():
             "No response directory provided. Using default directory 'ip_osint_json'."
         )
         ii_data = ii_check_ip(response_json_file=response_file)
-        print(ii_data)
+        nice_print_ii_ip_osint(ii_data)
     # If only the response directory is provided, print an error
     elif response_dir and not response_file:
         print(

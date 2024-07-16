@@ -103,7 +103,7 @@ def vt_check_ip(
     else:
         num_vendors_detected_malicious = (f"0/{total_vendors}")
 
-    # Return details as a dictionary with key virustotal_ip_osint
+    # Return details as a dictionary
     return {
         "ip": ip,
         "vendors_detected_malicious": vendors_detected_malicious,
