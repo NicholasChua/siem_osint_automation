@@ -40,11 +40,21 @@ This project was tested on Python 3.12.3.
 
 ### AbuseIPDB
 
-Instructions to be added.
+1. Register for a free AbuseIPDB account: [https://www.abuseipdb.com/register?plan=free](https://www.abuseipdb.com/register?plan=free).
+
+![AbuseIPDB Sign Up](readme_media/ai_signup.png)
+
+2. After registering, log in to your account and navigate to the [API Key page](https://www.abuseipdb.com/account/api). You can create a new API key by clicking on the `Create Key` button under the `Keys` section.
+
+![AbuseIPDB Create API Key](readme_media/ai_create_api_key.png)
+
+3. Give the key a name, then click on `Create` and the `Copy to Clipboard` button to copy your API key.
+
+![AbuseIPDB API Key](readme_media/ai_api_key.png)
 
 ### secrets.json
 
-`Warning`: Do not share, upload, commit, or otherwise expose your API keys to the public. This can lead to unauthorized access and usage of your API keys. The `secrets.json` file is used to store your API keys in a secure manner, and has been added to the `.gitignore` file to prevent accidental exposure.
+**`Warning`**: Do not share, upload, commit, or otherwise expose your API keys to the public. This can lead to unauthorized access and usage of your API keys. The `secrets.json` file is used to store your API keys in a secure manner, and has been added to the `.gitignore` file to prevent accidental exposure.
 
 1. Create a `secrets.json` file in the root directory of the project with the following format:
 
@@ -52,11 +62,11 @@ Instructions to be added.
 {
     "vt_api_key": "YOUR VIRUSTOTAL API KEY",
     "ip_info_api_key": "YOUR IPINFO API KEY",
-    "aipdb_key": "YOUR ABUSE IPDB API KEY"
+    "aipdb_key": "YOUR ABUSEIPDB API KEY"
 }
 ```
 
-2. Replace `YOUR VIRUSTOTAL API KEY`, `YOUR IPINFO API KEY`, `YOUR ABUSE IPDB API KEY` with the respective API keys you obtained in the previous steps.
+2. Replace `YOUR VIRUSTOTAL API KEY`, `YOUR IPINFO API KEY`, `YOUR ABUSEIPDB API KEY` with the respective API keys you obtained in the previous steps.
 
 3. Ensure that the `secrets.json` file is in the root directory of the project.
 
@@ -151,7 +161,7 @@ The script will output `ai_ip_lookup.json` file in the `ip_osint_json` directory
 
 ### `comment.py`
 
-This script is essentially a template for combining both `vt_ip_osint.py` and `ii_ip_osint.py` scripts together, and generating a series of comments. This script is at an early stage of development, and full error handling and testing have not been conducted.
+This script is essentially a template for combining both `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. This script is at an early stage of development, and full error handling and testing have not been conducted.
 
 ```bash
 python comment.py --ip 8.8.8.8
