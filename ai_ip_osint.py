@@ -1,15 +1,7 @@
-import ipaddress
 import os
-import sys
-import requests
 import json
-
-
-# TODO: Remove this if folder.file internal import works
-# # Add the 'common' directory to the system path
-# current_dir = os.path.dirname(__file__)
-# common_dir = os.path.join(current_dir, "common")
-# sys.path.append(os.path.abspath(common_dir))
+import requests
+import ipaddress
 
 # Internal imports
 from common.helper_functions import (
@@ -17,7 +9,7 @@ from common.helper_functions import (
     add_argparser_arguments,
 )
 
-# Read secrets.json and import the API key aipdb_key
+# Read secrets.json and import the API key
 apidb_key = retrieve_secrets("aipdb_key")
 
 
@@ -40,19 +32,13 @@ def ai_ip_lookup(
     """
     # Set up parameters for the API call
     url = f"https://api.abuseipdb.com/api/v2/check"
-    
-    querystring = {
-        "ipAddress": input_ip,
-        "maxAgeInDays": '90'
-    }
-
-    headers = {
-        'Accept': 'application/json',
-        'Key': apidb_key
-    }
+    querystring = {"ipAddress": input_ip, "maxAgeInDays": "90"}
+    headers = {"Accept": "application/json", "Key": apidb_key}
 
     # Make the API call
-    response = requests.request(method='GET', url=url, headers=headers, params=querystring)
+    response = requests.request(
+        method="GET", url=url, headers=headers, params=querystring
+    )
 
     # If the response is successful, return the JSON data
     if response.status_code == 200:
@@ -60,9 +46,12 @@ def ai_ip_lookup(
             with open(os.path.join(json_dir, json_file), "w") as f:
                 json.dump(response.json(), f, indent=2)
                 return True
-        except:
+        except IOError or OSError:
             print("Error writing to file, returning raw response instead.")
             print(response.text())
+            return False
+        except:
+            print("Unknown error occurred.")
             return False
     # Else, return False
     else:
@@ -86,18 +75,14 @@ def ai_check_ip(
     response_json_dir_file = os.path.join(response_json_dir, response_json_file)
     with open(response_json_dir_file) as f:
         response = json.load(f)
-    
+
     # Get the ip, abuse confidence score, isTor from the JSON response
     ip = response["data"]["ipAddress"]
     abuse_confidence_score = response["data"]["abuseConfidenceScore"]
     is_tor = response["data"]["isTor"]
 
     # Return the details as a dictionary
-    return {
-        "ip": ip,
-        "abuseConfidenceScore": abuse_confidence_score,
-        "isTor": is_tor
-    }
+    return {"ip": ip, "abuseConfidenceScore": abuse_confidence_score, "isTor": is_tor}
 
 
 def nice_print_ai_ip_osint(ip_osint: dict) -> None:
@@ -110,14 +95,15 @@ def nice_print_ai_ip_osint(ip_osint: dict) -> None:
     None
     """
     # Print the IP address details
-    print(f"IP Address: {ip_osint['ip']}")
-    print(f"Abuse Confidence Score: {ip_osint['abuseConfidenceScore']}")
-    print(f"Is Tor: {ip_osint['isTor']}")
+    print(f"IP Address: {ip_osint["ip"]}")
+    print(f"Abuse Confidence Score: {ip_osint["abuseConfidenceScore"]}")
+    print(f"Is Tor: {ip_osint["isTor"]}")
 
 
 def main():
+    # Set up argparser with arguments
     args = add_argparser_arguments(ip=True, response_file=True, response_dir=True)
-    
+
     # Retrieve values from the command line arguments
     ip_address = args.ip
     response_file = args.response_file
@@ -128,13 +114,11 @@ def main():
         try:
             ipaddress.ip_address(ip_address)
         except ValueError:
-            print("Invalid IP address. Please provide a valid IP address.")
-            exit(1)
+            raise ValueError("Invalid IP address. Please provide a valid IP address.")
 
     # Decision tree for the arguments
     if ip_address and response_file:
-        print("Please provide only one of --ip or --response_file.")
-        exit(1)
+        raise ValueError("Please provide only one of --ip or --response_file.")
     # If the IP address is provided, perform the ipinfo IP lookup
     elif ip_address:
         lookup_ip_success = False
@@ -146,7 +130,9 @@ def main():
             print("Error with the AbuseIPDB API call.")
     # If both the response file and directory are provided, use them
     elif response_file and response_dir:
-        ai_data = ai_check_ip(response_json_file=response_file, response_json_dir=response_dir)
+        ai_data = ai_check_ip(
+            response_json_file=response_file, response_json_dir=response_dir
+        )
         nice_print_ai_ip_osint(ai_data)
     # If only the response file is provided, use the default directory
     elif response_file and not response_dir:
@@ -157,14 +143,12 @@ def main():
         nice_print_ai_ip_osint(ai_data)
     # If only the response directory is provided, print an error
     elif response_dir and not response_file:
-        print(
+        raise ValueError(
             "Please provide the response file (--response_file <file>) with the response directory."
         )
-        exit(1)
     # If no or invalid arguments are provided, print an error
     else:
-        print("Please provide one of --ip or --response_file.")
-        exit(1)
+        raise ValueError("Please provide one of --ip or --response_file.")
 
 
 if __name__ == "__main__":

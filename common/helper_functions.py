@@ -1,9 +1,7 @@
-# TODO: Move reusable functions here and import them in other scripts.
-
 import argparse
-import ipaddress
 import json
 import os
+
 
 def retrieve_secrets(*argv: str) -> dict | str:
     """Retrieve secrets from a JSON file and return them as a dictionary.
@@ -19,7 +17,7 @@ def retrieve_secrets(*argv: str) -> dict | str:
     secrets = {}
 
     # Get the path to the secrets file
-    secrets_file = os.path.join(os.path.dirname(__file__), '..', 'secrets.json')
+    secrets_file = os.path.join(os.path.dirname(__file__), "..", "secrets.json")
 
     # Open the secrets file and load the secrets
     with open(secrets_file) as f:
@@ -36,7 +34,9 @@ def retrieve_secrets(*argv: str) -> dict | str:
         return secrets
 
 
-def add_argparser_arguments(ip: bool, response_file: bool, response_dir: bool) -> argparse.ArgumentParser:
+def add_argparser_arguments(
+    ip: bool, response_file: bool, response_dir: bool
+) -> argparse.ArgumentParser:
     """Add arguments to the ArgumentParser object for the script to take in user inputs.
     This function takes in boolean arguments to determine which arguments should be provided.
 
@@ -81,11 +81,3 @@ def add_argparser_arguments(ip: bool, response_file: bool, response_dir: bool) -
 
     args = parser.parse_args()
     return args
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()

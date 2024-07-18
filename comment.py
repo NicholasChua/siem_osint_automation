@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import ipaddress
 import vt_ip_osint as vt
@@ -6,7 +5,15 @@ import ii_ip_osint as ii
 import ai_ip_osint as ai
 
 
-def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: dict = {}) -> str:
+# Internal imports
+from common.helper_functions import (
+    add_argparser_arguments,
+)
+
+
+def format_comment(
+    vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: dict = {}
+) -> str:
     """Function to format the IP OSINT details from VirusTotal, ipinfo.io and AbuseIPDB into a comment.
 
     Args:
@@ -30,11 +37,15 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: 
 
     # Check for presence of filled vt_ip_osint, ii_ip_osint, and ai_ip_osint dictionaries
     if vt_ip_osint == {} and ii_ip_osint == {} and ai_ip_osint == {}:
-        raise Exception("VirusTotal, ipinfo IP OSINT, and AbuseIPDB dictionaries are empty.")
+        raise Exception(
+            "VirusTotal, ipinfo IP OSINT, and AbuseIPDB dictionaries are empty."
+        )
 
     if vt_ip_osint:
         try:
-            comment += [f"- VirusTotal Link: https://www.virustotal.com/gui/ip-address/{vt_ip_osint['ip']}"]
+            comment += [
+                f"- VirusTotal Link: https://www.virustotal.com/gui/ip-address/{vt_ip_osint['ip']}"
+            ]
 
             # Check for vendors that detected the IP address as malicious
             if vt_ip_osint["vendors_detected_malicious"]:
@@ -47,28 +58,30 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: 
             print("Missing key in vt_ip_osint. Assuming it is empty.")
             pass
         except:
-            # TODO: Handle the exception
-            print("Error in vt_ip_osint.")
-            exit(1)
+            raise Exception("Error in vt_ip_osint.")
 
     if ii_ip_osint:
         try:
             comment += [f"- ipinfo Link: https://ipinfo.io/{ii_ip_osint['ip']}"]
-            comment += [f"- IP Geolocation is in country {ii_ip_osint['country']}, region {ii_ip_osint['region']}, city {ii_ip_osint['city']}."]
+            comment += [
+                f"- IP Geolocation is in country {ii_ip_osint['country']}, region {ii_ip_osint['region']}, city {ii_ip_osint['city']}."
+            ]
             comment += [f"- IP belongs to: {ii_ip_osint['organization']}"]
         except KeyError:
             print("Missing key in ii_ip_osint. Assuming it is empty.")
             pass
         except:
-            # TODO: Handle the exception
-            print("Error in ii_ip_osint.")
-            exit(1)
+            raise Exception("Error in ii_ip_osint.")
 
     if ai_ip_osint:
         try:
-            comment += [f"- AbuseIPDB Link: https://www.abuseipdb.com/check/{ai_ip_osint['ip']}"]
-            comment += [f"- Abuse Confidence Score: {ai_ip_osint['abuseConfidenceScore']}"]
-            
+            comment += [
+                f"- AbuseIPDB Link: https://www.abuseipdb.com/check/{ai_ip_osint['ip']}"
+            ]
+            comment += [
+                f"- Abuse Confidence Score: {ai_ip_osint['abuseConfidenceScore']}"
+            ]
+
             # Print an appropriate message based on the isTor value
             if ai_ip_osint["isTor"]:
                 comment += ["- IP is a Tor exit node."]
@@ -79,9 +92,7 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: 
             print("Missing key in ai_ip_osint. Assuming it is empty.")
             pass
         except:
-            # TODO: Handle the exception
-            print("Error in ii_ip_osint.")
-            exit(1)
+            raise Exception("Error in ai_ip_osint.")
 
     # Convert the comment list to a string
     commentStr = "\n".join(comment)
@@ -90,20 +101,10 @@ def format_comment(vt_ip_osint: dict = {}, ii_ip_osint: dict = {}, ai_ip_osint: 
 
 
 def main():
-    # Set up the argument parser
-    parser = argparse.ArgumentParser()
+    # Set up argparser with arguments
+    args = add_argparser_arguments(ip=True, response_file=False, response_dir=False)
 
-    # Add arguments
-    parser.add_argument(
-        "--ip",
-        "-i",
-        type=str,
-        help="The IP address to look up.",
-        required=True,
-    )
-
-    # Parse arguments
-    args = parser.parse_args()
+    # Get the IP address from the arguments
     ip_address = args.ip
 
     # Perform input validation of IP address using built-in ipaddress module
@@ -135,7 +136,9 @@ def main():
         ai_ip_osint = {}
 
     # Pass the dictionaries to the format_comment function
-    comment = format_comment(vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint, ai_ip_osint=ai_ip_osint)
+    comment = format_comment(
+        vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint, ai_ip_osint=ai_ip_osint
+    )
     print(comment)
 
 
