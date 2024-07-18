@@ -19,7 +19,7 @@ This project was tested on Python 3.12.3.
 1. Register for a free VirusTotal account: [https://www.virustotal.com/gui/join-us](https://www.virustotal.com/gui/join-us).
 
 ![VirusTotal Sign Up Page](readme_media/vt_signup.png)
-   
+
 2. Once logged in, click on the top-right corner where your profile icon is and select "API Key". This will direct you to the [API Key page](https://www.virustotal.com/gui/my-apikey).
 
 ![VirusTotal Select API Key](readme_media/vt_select_api_key.png)
@@ -114,7 +114,7 @@ source env/bin/activate
 
 For Windows:
 
-```bash
+```plaintext
 python -m venv .venv
 .\.venv\Scripts\activate
 ```
@@ -139,6 +139,14 @@ python vt_ip_osint.py --ip 8.8.8.8
 
 The script will output `vt_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
+Example Output:
+
+```plaintext
+IP Address: 8.8.8.8
+No VT vendors detected this IP Address as malicious.
+VT vendors that detected this IP Address as malicious: 0/92
+```
+
 ### `ii_ip_osint.py`
 
 This script takes in IP addresses as input and queries ipinfo.io for information on the IP addresses. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. city, region, org, country) and return it to the user.
@@ -148,6 +156,16 @@ python ii_ip_osint.py --ip 8.8.8.8
 ```
 
 The script will output `ii_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
+
+Example Output:
+
+```plaintext
+IP Address: 8.8.8.8
+City: Mountain View
+Region: California
+Organization: AS15169 Google LLC
+Country: United States
+```
 
 ### `ai_ip_osint.py`
 
@@ -159,12 +177,37 @@ python ai_ip_osint.py --ip 8.8.8.8
 
 The script will output `ai_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full AbuseIPDB response. Note that the output file is overwritten each time the script is run.
 
+Example Output:
+
+```plaintext
+IP Address: 8.8.8.8
+Abuse Confidence Score: 0
+Is Tor: False
+```
+
 ### `comment.py`
 
-This script is essentially a template for combining both `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. This script is at an early stage of development, and full error handling and testing have not been conducted.
+This script is essentially a template for combining both `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. The script takes in an IP address as input and generates a comment based on the output of the three scripts.
+
+As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, and `ai_ip_lookup.json` files in the `ip_osint_json` directory. Note that the output files are overwritten each time the script is run.
 
 ```bash
 python comment.py --ip 8.8.8.8
+```
+
+Example Output:
+    
+```plaintext
+SOAP_auto_analysis:
+- Analyzed at 2024-07-18T09:31:19.506173+08:00.
+- VirusTotal Link: https://www.virustotal.com/gui/ip-address/8.8.8.8
+- IP is clean in VirusTotal.
+- ipinfo Link: https://ipinfo.io/8.8.8.8
+- IP Geolocation is in country United States, region California, city Mountain View.
+- IP belongs to: AS15169 Google LLC
+- AbuseIPDB Link: https://www.abuseipdb.com/check/8.8.8.8
+- Abuse Confidence Score: 0
+- IP is not a Tor exit node.
 ```
 
 ## Video Demo
