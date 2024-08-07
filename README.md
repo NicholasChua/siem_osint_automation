@@ -86,8 +86,9 @@ I assume the following file structure:
 │   └───__init__.py
 ├───ip_osint_json
 │   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
-│   └───ii_ip_lookup.json (Output from ii_ip_osint.py)
-│   └───ai_ip_lookup.json (Output from ai_ip_osint.py)
+│   ├───ii_ip_lookup.json (Output from ii_ip_osint.py)
+│   ├───ai_ip_lookup.json (Output from ai_ip_osint.py)
+│   └───vt_file_lookup.json (Output from vt_file_osint.py)
 ├───vt_ip_osint.py
 ├───ii_ip_osint.py
 ├───ai_ip_osint.py
@@ -187,7 +188,7 @@ Is Tor: False
 
 ### `comment.py`
 
-This script is essentially a template for combining both `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. The script takes in an IP address as input and generates a comment based on the output of the three scripts.
+This script is essentially a template for combining the `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. The script takes in an IP address as input and generates a comment based on the output of the three scripts.
 
 As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, and `ai_ip_lookup.json` files in the `ip_osint_json` directory. Note that the output files are overwritten each time the script is run.
 
@@ -210,6 +211,17 @@ SOAP_auto_analysis:
 - IP is not a Tor exit node.
 ```
 
+### `vt_file_osint.py`
+
+This script takes in files or file hashes as input and queries VirusTotal for information on the file hashes. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
+
+```bash
+python vt_file_osint.py --malware_file malware.exe
+python vt_file_osint.py --malware_hash fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
+```
+
+The script will output `vt_file_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
+
 ## Video Demo
 
 Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
@@ -223,12 +235,13 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 - [x] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
 - [x] Main file to run all scripts together (currently up to AbuseIPDB)
 - [x] Implement AbuseIPDB IP Reputation Lookup script via API
-- [ ] Implement haveibeenpwned.com Email Lookup script via API
+- [ ] Implement VirusTotal File Lookup script via API (partially done
 
 ## Not Feasible
 
 - [ ] Implement Cisco Talos IP Reputation Lookup script via web scraping (no API, uses Cloudflare protection)
 - [ ] Implement IBM X-Force IP Reputation Lookup script via web scraping (API only lasts for 30 days)
+- [ ] Implement haveibeenpwned.com Email Lookup script via API (cost)
 
 ## Excluded
 

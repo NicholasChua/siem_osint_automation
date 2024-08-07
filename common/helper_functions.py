@@ -84,8 +84,7 @@ def unix_timestamp_to_iso(timestamp: int) -> str:
 
 
 def add_argparser_arguments(
-    ip: bool, response_file: bool, response_dir: bool
-) -> argparse.ArgumentParser:
+    ip: bool = False, response_file: bool = False, response_dir: bool = False, malware_file: bool = False, malware_hash: bool = False) -> argparse.ArgumentParser:
     """Add arguments to the ArgumentParser object for the script to take in user inputs.
     This function takes in boolean arguments to determine which arguments should be provided.
 
@@ -93,6 +92,9 @@ def add_argparser_arguments(
         ip: A boolean indicating whether the IP address argument should be added.
         response_file: A boolean indicating whether the filename argument should be added.
         response_dir: A boolean indicating whether the directory argument should be added.
+        malware_file: A boolean indicating whether the malware filename argument should be added. Default is False.
+        malware_hash: A boolean indicating whether the malware hash argument should be added. Default is False.
+
 
     Returns:
         ArgumentParser: The ArgumentParser object with the added arguments.
@@ -125,6 +127,24 @@ def add_argparser_arguments(
             "-d",
             type=str,
             help="The directory of the JSON response from the IP lookup. Must be used with --response_file",
+            required=False,
+        )
+
+    if malware_file:
+        parser.add_argument(
+            "--malware_file",
+            "-mf",
+            type=str,
+            help="The malware file to look up.",
+            required=False,
+        )
+
+    if malware_hash:
+        parser.add_argument(
+            "--malware_hash",
+            "-mh",
+            type=str,
+            help="The hash of the malware file to look up.",
             required=False,
         )
 
