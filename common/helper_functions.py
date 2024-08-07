@@ -1,14 +1,16 @@
 import argparse
 import json
 import os
+import datetime
+import hashlib
 
 
 def retrieve_secrets(*argv: str) -> dict | str:
     """Retrieve secrets from a JSON file and return them as a dictionary.
 
     Args:
-        secrets_file (str): The path to the JSON file containing the secrets.
-        *argv (str): The list of secrets to retrieve from the JSON file.
+        secrets_file: The path to the JSON file containing the secrets.
+        *argv: The list of secrets to retrieve from the JSON file.
 
     Returns:
         dict | str: A dictionary containing the secrets or a string containing a secret
@@ -32,6 +34,53 @@ def retrieve_secrets(*argv: str) -> dict | str:
     # Otherwise, return the secrets dictionary
     else:
         return secrets
+
+
+def hash_file(file_path: str, algorithm: str) -> str:
+    """Hash a file using a choice of MD5, SHA-1, or SHA-256 algorithm.
+
+    Args:
+        file_path: The path to the file to hash.
+        algorithm: The hashing algorithm to use. Valid options are md5, sha1, or sha256.
+
+    Returns:
+        str: The hash of the file in the chosen algorithm.
+    """
+    # Initialize the hashing object
+    if algorithm == "md5":
+        hasher = hashlib.md5()
+    elif algorithm == "sha1":
+        hasher = hashlib.sha1()
+    elif algorithm == "sha256":
+        hasher = hashlib.sha256()
+    else:
+        raise ValueError(
+            "Invalid hashing algorithm. Please choose md5, sha1, or sha256."
+        )
+
+    # Open the file and read it in chunks
+    with open(file_path, "rb") as file:
+        while chunk := file.read(4096):
+            hasher.update(chunk)
+
+    # Return the hash of the file
+    return hasher.hexdigest()
+
+
+def unix_timestamp_to_iso(timestamp: int) -> str:
+    """Convert a Unix timestamp to an ISO 8601 formatted string.
+
+    Args:
+        timestamp: The Unix timestamp to convert.
+
+    Returns:
+        str: The ISO 8601 formatted string.
+    """
+    # Convert Unix timestamp to datetime object
+    dt = datetime.datetime.fromtimestamp(timestamp)
+
+    # Convert datetime object to ISO 8601 string
+    return dt.isoformat()
 
 
 def add_argparser_arguments(
