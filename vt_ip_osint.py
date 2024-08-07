@@ -23,12 +23,12 @@ def vt_ip_lookup(
     If the API call is unsuccessful or the file write fails, the function returns False.
 
     Args:
-    input_ip: The IP address to look up.
-    json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
-    json_file: The filename of the JSON response file. Default is "ip_lookup.json".
+        input_ip: The IP address to look up.
+        json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
+        json_file: The filename of the JSON response file. Default is "ip_lookup.json".
 
     Returns:
-    bool: True if the API call was successful, False otherwise.
+        bool: True if the API call was successful, False otherwise.
     """
     # Set up parameters for the API call
     url = f"https://www.virustotal.com/api/v3/ip_addresses/{input_ip}"
@@ -63,11 +63,11 @@ def vt_check_ip(
     """Function to check the response from a VirusTotal IP lookup for vendors that detected the IP address as malicious.
 
     Args:
-    response_json_dir: The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
-    response_json_file: The filename of the JSON response from the VirusTotal IP lookup. Default is "vt_ip_lookup.json".
+        response_json_dir: The directory of the JSON response from the VirusTotal IP lookup. Default is "ip_osint_json".
+        response_json_file: The filename of the JSON response from the VirusTotal IP lookup. Default is "vt_ip_lookup.json".
 
     Returns:
-    dict: A dictionary containing the vendors that detected the IP address as malicious and number of vendors from the JSON response.
+        dict: A dictionary containing the vendors that detected the IP address as malicious and number of vendors from the JSON response.
     """
     # Form the file path to read
     response_json_dir_file = os.path.join(response_json_dir, response_json_file)
@@ -119,10 +119,10 @@ def nice_print_vt_ip_osint(ip_osint: dict) -> None:
     """Function to print the IP OSINT details in a user-friendly format. This is necessary if the user runs this script directly.
 
     Args:
-    ip_osint: A dictionary containing the IP OSINT details from vt_check_ip().
+        ip_osint: A dictionary containing the IP OSINT details from vt_check_ip().
 
     Returns:
-    None
+        None
     """
     # Print the IP OSINT details
     print(f"IP Address: {ip_osint["ip"]}")

@@ -23,12 +23,12 @@ def ai_ip_lookup(
     If the API call is unsuccessful or the file write fails, the function returns False.
 
     Args:
-    input_ip: The IP address to look up.
-    json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
-    json_file: The filename of the JSON response file. Default is "ai_ip_lookup.json".
+        input_ip: The IP address to look up.
+        json_dir: The directory to save the JSON response file. Default is "ip_osint_json".
+        json_file: The filename of the JSON response file. Default is "ai_ip_lookup.json".
 
     Returns:
-    bool: True if the API call was successful, False otherwise.
+        bool: True if the API call was successful, False otherwise.
     """
     # Set up parameters for the API call
     url = f"https://api.abuseipdb.com/api/v2/check"
@@ -65,11 +65,11 @@ def ai_check_ip(
     """Function to check the response from an AbuseIPDB IP lookup for the abuse confidence score.
 
     Args:
-    response_json_dir: The directory of the JSON response from the AbuseIPDB IP lookup. Default is "ip_osint_json".
-    response_json_file: The filename of the JSON response from the AbuseIPDB IP lookup. Default is "ai_ip_lookup.json".
+        response_json_dir: The directory of the JSON response from the AbuseIPDB IP lookup. Default is "ip_osint_json".
+        response_json_file: The filename of the JSON response from the AbuseIPDB IP lookup. Default is "ai_ip_lookup.json".
 
     Returns:
-    dict: The abuse confidence score from the AbuseIPDB IP lookup.
+        dict: The abuse confidence score from the AbuseIPDB IP lookup.
     """
     # Form the file path to read
     response_json_dir_file = os.path.join(response_json_dir, response_json_file)
@@ -89,10 +89,10 @@ def nice_print_ai_ip_osint(ip_osint: dict) -> None:
     """Function to print the IP address details in a nice format. This is necessary if the user runs this script directly.
 
     Args:
-    ip_osint: A dictionary containing the details of this IP address from the JSON response.
+        ip_osint: A dictionary containing the details of this IP address from the JSON response.
 
     Returns:
-    None
+        None
     """
     # Print the IP address details
     print(f"IP Address: {ip_osint["ip"]}")
