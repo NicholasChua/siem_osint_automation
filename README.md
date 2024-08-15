@@ -88,10 +88,13 @@ I assume the following file structure:
 │   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
 │   ├───ii_ip_lookup.json (Output from ii_ip_osint.py)
 │   ├───ai_ip_lookup.json (Output from ai_ip_osint.py)
-│   └───vt_file_lookup.json (Output from vt_file_osint.py)
+│   ├───vt_file_lookup.json (Output from vt_file_osint.py)
+│   └───vt_domain_lookup.json (Output from vt_domain_osint.py)
 ├───vt_ip_osint.py
 ├───ii_ip_osint.py
 ├───ai_ip_osint.py
+├───vt_file_osint.py
+├───vt_domain_osint.py
 ├───comment.py
 └───secrets.json
 ```
@@ -110,7 +113,7 @@ For Unix/Linux/MacOS:
 
 ```bash
 python -m venv .venv
-source env/bin/activate
+source .venv/bin/activate
 ```
 
 For Windows:
@@ -220,7 +223,39 @@ python vt_file_osint.py --malware_file malware.exe
 python vt_file_osint.py --malware_hash fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
 ```
 
+Example Output:
+
+```plaintext
+Threat Label: hacktool.mimikatz/hacktoolx
+File Type: Win32 EXE
+Last Analysis Date: 2024-08-11T20:00:58
+The following VT vendors detected this file as malicious: Bkav, Lionic, Elastic, MicroWorld-eScan, CAT-QuickHeal, Skyhigh, ALYac, Cylance, Zillya, Sangfor, K7AntiVirus, Alibaba, K7GW, Cybereason, Arcabit, huorong, Symantec, ESET-NOD32, APEX, TrendMicro-HouseCall, Paloalto, ClamAV, Kaspersky, BitDefender, NANO-Antivirus, SUPERAntiSpyware, Avast, Tencent, Emsisoft, Google, DrWeb, VIPRE, TrendMicro, McAfeeD, Trapmine, FireEye, Sophos, Ikarus, Jiangmin, Webroot, Varist, Antiy-AVL, Kingsoft, Gridinsoft, Xcitium, Microsoft, ViRobot, ZoneAlarm, GData, Cynet, AhnLab-V3, McAfee, MAX, VBA32, Malwarebytes, Panda, Rising, Yandex, SentinelOne, MaxSecure, Fortinet, AVG, DeepInstinct, CrowdStrike, alibabacloud
+VT vendors that detected this file as malicious: 65/79
+```
+
 The script will output `vt_file_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
+
+### `vt_domain_osint.py`
+
+This script takes in domains as input and queries VirusTotal for information on the domains. The script then outputs the response to the console. The script will output the domain, the IP addresses, alternate domains, which vendors consider it malicious, and how many vendors detected it as malicious.
+
+```bash
+python vt_domain_osint.py -d polyfill.io
+```
+
+Example Output:
+
+```plaintext
+Domain: polyfill.io
+Last Analysis Date: 2024-08-15T15:35:37
+IPv4 Addresses: 104.21.18.249, 172.67.184.69
+IPv6 Addresses: 2606:4700:3031::6815:12f9, 2606:4700:3037::ac43:b845
+Alternate Domains: polyfill.io.cdn.cloudflare.net
+The following VT vendors detected this domain as malicious: alphaMountain.ai, Bfore.Ai PreCrime, CyRadar, Dr.Web, ESTsecurity, Emsisoft, Fortinet, Lionic, Sansec eComscan, Seclookup, Webroot   
+Number of vendors that detected this domain as malicious: 11/93
+```
+
+The script will output `vt_domain_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
 ## Video Demo
 
@@ -235,7 +270,9 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 - [x] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
 - [x] Main file to run all scripts together (currently up to AbuseIPDB)
 - [x] Implement AbuseIPDB IP Reputation Lookup script via API
-- [ ] Implement VirusTotal File Lookup script via API (partially done
+- [x] Implement VirusTotal File Lookup script via API
+- [x] Implement VirusTotal Domain Lookup script via API
+- [ ] Consolidate into main file for all scripts
 
 ## Not Feasible
 

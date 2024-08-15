@@ -84,7 +84,7 @@ def unix_timestamp_to_iso(timestamp: int) -> str:
 
 
 def add_argparser_arguments(
-    ip: bool = False, response_file: bool = False, response_dir: bool = False, malware_file: bool = False, malware_hash: bool = False) -> argparse.ArgumentParser:
+    ip: bool = False, response_file: bool = False, response_dir: bool = False, malware_file: bool = False, malware_hash: bool = False, domain: bool = False) -> argparse.ArgumentParser:
     """Add arguments to the ArgumentParser object for the script to take in user inputs.
     This function takes in boolean arguments to determine which arguments should be provided.
 
@@ -94,7 +94,7 @@ def add_argparser_arguments(
         response_dir: A boolean indicating whether the directory argument should be added.
         malware_file: A boolean indicating whether the malware filename argument should be added. Default is False.
         malware_hash: A boolean indicating whether the malware hash argument should be added. Default is False.
-
+        domain: A boolean indicating whether the domain argument should be added. Default is False.
 
     Returns:
         ArgumentParser: The ArgumentParser object with the added arguments.
@@ -115,7 +115,7 @@ def add_argparser_arguments(
     if response_file:
         parser.add_argument(
             "--response_file",
-            "-f",
+            "-rf",
             type=str,
             help="The filename of the JSON response from the IP lookup.",
             required=False,
@@ -124,7 +124,7 @@ def add_argparser_arguments(
     if response_dir:
         parser.add_argument(
             "--response_dir",
-            "-d",
+            "-rd",
             type=str,
             help="The directory of the JSON response from the IP lookup. Must be used with --response_file",
             required=False,
@@ -145,6 +145,15 @@ def add_argparser_arguments(
             "-mh",
             type=str,
             help="The hash of the malware file to look up.",
+            required=False,
+        )
+
+    if domain:
+        parser.add_argument(
+            "--domain",
+            "-d",
+            type=str,
+            help="The domain to look up.",
             required=False,
         )
 
