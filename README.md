@@ -135,7 +135,7 @@ pip install -r requirements.txt
 
 ### `vt_ip_osint.py`
 
-This script takes in IP addresses as input and queries VirusTotal for information on the IP addresses. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
+This script takes in an IP address as input and queries VirusTotal for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
 
 ```bash
 python vt_ip_osint.py --ip 8.8.8.8
@@ -153,7 +153,7 @@ VT vendors that detected this IP Address as malicious: 0/92
 
 ### `ii_ip_osint.py`
 
-This script takes in IP addresses as input and queries ipinfo.io for information on the IP addresses. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. city, region, org, country) and return it to the user.
+This script takes in an IP address as input and queries ipinfo.io for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. city, region, org, country) and return it to the user.
 
 ```bash
 python ii_ip_osint.py --ip 8.8.8.8
@@ -173,7 +173,7 @@ Country: United States
 
 ### `ai_ip_osint.py`
 
-This script takes in IP addresses as input and queries AbuseIPDB for information on the IP addresses. The script then outputs the response to the console. The script will output the IP address, the number of reports, the abuse confidence score, and the country code.
+This script takes in an IP address as input and queries AbuseIPDB for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. IP address, number of reports, abuse confidence score, country code) and return it to the user.
 
 ```bash
 python ai_ip_osint.py --ip 8.8.8.8
@@ -189,34 +189,9 @@ Abuse Confidence Score: 0
 Is Tor: False
 ```
 
-### `comment.py`
-
-This script is essentially a template for combining the `vt_ip_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. The script takes in an IP address as input and generates a comment based on the output of the three scripts.
-
-As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, and `ai_ip_lookup.json` files in the `ip_osint_json` directory. Note that the output files are overwritten each time the script is run.
-
-```bash
-python comment.py --ip 8.8.8.8
-```
-
-Example Output:
-    
-```plaintext
-SOAP_auto_analysis:
-- Analyzed at 2024-07-18T09:31:19.506173+08:00.
-- VirusTotal Link: https://www.virustotal.com/gui/ip-address/8.8.8.8
-- IP is clean in VirusTotal.
-- ipinfo Link: https://ipinfo.io/8.8.8.8
-- IP Geolocation is in country United States, region California, city Mountain View.
-- IP belongs to: AS15169 Google LLC
-- AbuseIPDB Link: https://www.abuseipdb.com/check/8.8.8.8
-- Abuse Confidence Score: 0
-- IP is not a Tor exit node.
-```
-
 ### `vt_file_osint.py`
 
-This script takes in files or file hashes as input and queries VirusTotal for information on the file hashes. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
+This script takes in a file or a file hash as input and queries VirusTotal for information on the file or file hash. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. threat label, file type, which vendors consider it malicious) and return it to the user.
 
 ```bash
 python vt_file_osint.py --malware_file malware.exe
@@ -237,7 +212,7 @@ The script will output `vt_file_lookup.json` file in the `ip_osint_json` directo
 
 ### `vt_domain_osint.py`
 
-This script takes in domains as input and queries VirusTotal for information on the domains. The script then outputs the response to the console. The script will output the domain, the IP addresses, alternate domains, which vendors consider it malicious, and how many vendors detected it as malicious.
+This script takes in a domain as input and queries VirusTotal for information on the domain. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. IP addresses, alternate domains, which vendors consider it malicious) and return it to the user.
 
 ```bash
 python vt_domain_osint.py -d polyfill.io
@@ -257,6 +232,53 @@ Number of vendors that detected this domain as malicious: 11/93
 
 The script will output `vt_domain_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
+### `comment.py`
+
+This script is essentially a template for combining the `vt_ip_osint.py`, `ii_ip_osint.py`, `ai_ip_osint.py`, `vt_file_osint.py` and `vt_domain_osint.py` scripts together, and generating a series of comments. The script takes in an IP address, malware file or hash, or domain as input and generates a comment based on the output of the three scripts.
+
+As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, and `ai_ip_lookup.json` files in the `ip_osint_json` directory. Note that the output files are overwritten each time the script is run.
+
+```bash
+python comment.py --ip 8.8.8.8
+python comment.py --malware_file malware.exe
+python comment.py --malware_hash fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
+python comment.py -d polyfill.io
+```
+
+Example Output:
+
+```plaintext
+SOAP_auto_analysis:
+- Analyzed at 2024-07-18T09:31:19.506173+08:00.
+- VirusTotal Link: https://www.virustotal.com/gui/ip-address/8.8.8.8
+- IP is clean in VirusTotal.
+- ipinfo Link: https://ipinfo.io/8.8.8.8
+- IP Geolocation is in country United States, region California, city Mountain View.
+- IP belongs to: AS15169 Google LLC
+- AbuseIPDB Link: https://www.abuseipdb.com/check/8.8.8.8
+- Abuse Confidence Score: 0
+- IP is not a Tor exit node.
+```
+
+```plaintext
+SOAP_auto_analysis:
+- Analyzed at 2024-08-26T11:20:33.845629+08:00.
+- VirusTotal Link: https://www.virustotal.com/gui/file/('fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37',)
+- Threat Label: hacktool.mimikatz/hacktoolx
+- File Type: Win32 EXE
+- File flagged as potential threat by 64/79 VirusTotal vendors: Lionic, AVG, DrWeb, MicroWorld-eScan, FireEye, CAT-QuickHeal, Skyhigh, McAfee, Malwarebytes, VIPRE, Sangfor, CrowdStrike, Alibaba, K7GW, K7AntiVirus, Symantec, Elastic, ESET-NOD32, Cynet, APEX, Paloalto, ClamAV, Kaspersky, BitDefender, NANO-Antivirus, SUPERAntiSpyware, Avast, Tencent, Emsisoft, Zillya, TrendMicro, McAfeeD, SentinelOne, Trapmine, Sophos, Ikarus, Jiangmin, Webroot, Google, Antiy-AVL, Kingsoft, Microsoft, Gridinsoft, Xcitium, Arcabit, ViRobot, ZoneAlarm, GData, Varist, AhnLab-V3, ALYac, MAX, VBA32, Cylance, Panda, TrendMicro-HouseCall, Rising, Yandex, huorong, MaxSecure, Fortinet, Cybereason, DeepInstinct, alibabacloud
+```
+
+```plaintext
+SOAP_auto_analysis:
+- Analyzed at 2024-08-26T11:20:41.232520+08:00.
+- VirusTotal Link: https://www.virustotal.com/gui/domain/polyfill.io
+- IPv4 Addresses: 104.21.18.249, 172.67.184.69
+- IPv6 Addresses: 2606:4700:3031::6815:12f9, 2606:4700:3037::ac43:b845
+- Alternate Domains: polyfill.io.cdn.cloudflare.net
+- Domain flagged as potential threat by 11/94 VirusTotal vendors: alphaMountain.ai, Bfore.Ai PreCrime, CyRadar, Dr.Web, ESTsecurity, Emsisoft, Fortinet, Lionic, Sansec eComscan, Seclookup, Webroot
+```
+
 ## Video Demo
 
 Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
@@ -268,11 +290,10 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 - [x] Implement VirusTotal IP Lookup script via API
 - [x] Implement ipinfo.io IP Lookup script via API
 - [x] Automated comment generation for each script (i.e. timestamp, IP address, etc.)
-- [x] Main file to run all scripts together (currently up to AbuseIPDB)
+- [x] Main file to run all scripts together
 - [x] Implement AbuseIPDB IP Reputation Lookup script via API
 - [x] Implement VirusTotal File Lookup script via API
 - [x] Implement VirusTotal Domain Lookup script via API
-- [ ] Consolidate into main file for all scripts
 
 ## Not Feasible
 

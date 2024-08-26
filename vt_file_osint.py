@@ -98,12 +98,14 @@ def vt_check_file(
         num_vendors_detected_malicious = f"0/{total_vendors}"
 
     # Get the pertinent information from the JSON response
+    sha256 = response["data"]["id"],
     threat_label = response["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]
     file_type = response["data"]["attributes"]["type_description"]
     last_analysis_date_iso = unix_timestamp_to_iso(response["data"]["attributes"]["last_analysis_date"])
 
     # Return details as a dictionary
     return {
+        "sha256": sha256,
         "threat_label": threat_label,
         "file_type": file_type,
         "last_analysis_date": last_analysis_date_iso,
