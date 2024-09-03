@@ -84,17 +84,16 @@ I assume the following file structure:
 ├───common
 │   ├───helper_functions.py
 │   └───__init__.py
-├───ip_osint_json
+├───osint_json
+│   ├───README.md
 │   ├───vt_ip_lookup.json (Output from vt_ip_osint.py)
 │   ├───ii_ip_lookup.json (Output from ii_ip_osint.py)
 │   ├───ai_ip_lookup.json (Output from ai_ip_osint.py)
 │   ├───vt_file_lookup.json (Output from vt_file_osint.py)
 │   └───vt_domain_lookup.json (Output from vt_domain_osint.py)
-├───vt_ip_osint.py
+├───vt_osint.py
 ├───ii_ip_osint.py
 ├───ai_ip_osint.py
-├───vt_file_osint.py
-├───vt_domain_osint.py
 ├───comment.py
 └───secrets.json
 ```
@@ -133,24 +132,6 @@ pip install -r requirements.txt
 
 ## Usage
 
-### `vt_ip_osint.py`
-
-This script takes in an IP address as input and queries VirusTotal for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
-
-```bash
-python vt_ip_osint.py --ip 8.8.8.8
-```
-
-The script will output `vt_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
-
-Example Output:
-
-```plaintext
-IP Address: 8.8.8.8
-No VT vendors detected this IP Address as malicious.
-VT vendors that detected this IP Address as malicious: 0/92
-```
-
 ### `ii_ip_osint.py`
 
 This script takes in an IP address as input and queries ipinfo.io for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. city, region, org, country) and return it to the user.
@@ -159,7 +140,7 @@ This script takes in an IP address as input and queries ipinfo.io for informatio
 python ii_ip_osint.py --ip 8.8.8.8
 ```
 
-The script will output `ii_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
+The script will output `ii_ip_lookup.json` file in the `osint_json` directory if the user wishes to look at the full ipinfo.io response. Note that the output file is overwritten each time the script is run.
 
 Example Output:
 
@@ -179,7 +160,7 @@ This script takes in an IP address as input and queries AbuseIPDB for informatio
 python ai_ip_osint.py --ip 8.8.8.8
 ```
 
-The script will output `ai_ip_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full AbuseIPDB response. Note that the output file is overwritten each time the script is run.
+The script will output `ai_ip_lookup.json` file in the `osint_json` directory if the user wishes to look at the full AbuseIPDB response. Note that the output file is overwritten each time the script is run.
 
 Example Output:
 
@@ -189,40 +170,60 @@ Abuse Confidence Score: 0
 Is Tor: False
 ```
 
-### `vt_file_osint.py`
+### `vt_osint.py`
 
-This script takes in a file or a file hash as input and queries VirusTotal for information on the file or file hash. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. threat label, file type, which vendors consider it malicious) and return it to the user.
+#### IP Address
+
+This script can take in an IP address as input and queries VirusTotal for information on the IP address. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. which vendors consider it malicious) and return it to the user.
 
 ```bash
-python vt_file_osint.py --malware_file malware.exe
-python vt_file_osint.py --malware_hash fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
+python vt_osint.py --ip 8.8.8.8
+```
+
+The script will output `vt_ip_lookup.json` file in the `osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
+
+Example Output:
+
+```plaintext
+IP Address: 8.8.8.8
+No VT vendors detected this IP Address as malicious.
+VT vendors that detected this IP Address as malicious: 0/92
+```
+
+#### File or File Hash
+
+This script can also take in a file or a file hash as input and queries VirusTotal for information on the file or file hash. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. threat label, file type, which vendors consider it malicious) and return it to the user.
+
+```bash
+python vt_osint.py --malware_file malware.exe
+python vt_osint.py --malware_hash fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
 ```
 
 Example Output:
 
 ```plaintext
-Threat Label: hacktool.mimikatz/hacktoolx
+Name: mimikatz.exe
 File Type: Win32 EXE
 Last Analysis Date: 2024-08-11T20:00:58
 The following VT vendors detected this file as malicious: Bkav, Lionic, Elastic, MicroWorld-eScan, CAT-QuickHeal, Skyhigh, ALYac, Cylance, Zillya, Sangfor, K7AntiVirus, Alibaba, K7GW, Cybereason, Arcabit, huorong, Symantec, ESET-NOD32, APEX, TrendMicro-HouseCall, Paloalto, ClamAV, Kaspersky, BitDefender, NANO-Antivirus, SUPERAntiSpyware, Avast, Tencent, Emsisoft, Google, DrWeb, VIPRE, TrendMicro, McAfeeD, Trapmine, FireEye, Sophos, Ikarus, Jiangmin, Webroot, Varist, Antiy-AVL, Kingsoft, Gridinsoft, Xcitium, Microsoft, ViRobot, ZoneAlarm, GData, Cynet, AhnLab-V3, McAfee, MAX, VBA32, Malwarebytes, Panda, Rising, Yandex, SentinelOne, MaxSecure, Fortinet, AVG, DeepInstinct, CrowdStrike, alibabacloud
 VT vendors that detected this file as malicious: 65/79
 ```
 
-The script will output `vt_file_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
+The script will output `vt_file_lookup.json` file in the `osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
-### `vt_domain_osint.py`
+#### Domain
 
-This script takes in a domain as input and queries VirusTotal for information on the domain. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. IP addresses, alternate domains, which vendors consider it malicious) and return it to the user.
+This script can also take in a domain as input and queries VirusTotal for information on the domain. The script then outputs the response to a .json file. The file is then further processed to extract relevant information (e.g. IP addresses, alternate domains, which vendors consider it malicious) and return it to the user.
 
 ```bash
-python vt_domain_osint.py -d polyfill.io
+python vt_osint.py -d polyfill.io
 ```
 
 Example Output:
 
 ```plaintext
 Domain: polyfill.io
-Last Analysis Date: 2024-08-15T15:35:37
+Last Analysis Date: 2024-08-15T15:35:37+08:00
 IPv4 Addresses: 104.21.18.249, 172.67.184.69
 IPv6 Addresses: 2606:4700:3031::6815:12f9, 2606:4700:3037::ac43:b845
 Alternate Domains: polyfill.io.cdn.cloudflare.net
@@ -230,13 +231,13 @@ The following VT vendors detected this domain as malicious: alphaMountain.ai, Bf
 Number of vendors that detected this domain as malicious: 11/93
 ```
 
-The script will output `vt_domain_lookup.json` file in the `ip_osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
+The script will output `vt_domain_lookup.json` file in the `osint_json` directory if the user wishes to look at the full VirusTotal response. Note that the output file is overwritten each time the script is run.
 
 ### `comment.py`
 
-This script is essentially a template for combining the `vt_ip_osint.py`, `ii_ip_osint.py`, `ai_ip_osint.py`, `vt_file_osint.py` and `vt_domain_osint.py` scripts together, and generating a series of comments. The script takes in an IP address, malware file or hash, or domain as input and generates a comment based on the output of the three scripts.
+This script is essentially a template for combining the `vt_osint.py`, `ii_ip_osint.py`, and `ai_ip_osint.py` scripts together, and generating a series of comments. The script takes in an IP address, malware file or hash, or domain as input and generates a comment based on the output of the three scripts.
 
-As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, and `ai_ip_lookup.json` files in the `ip_osint_json` directory. Note that the output files are overwritten each time the script is run.
+As this script uses the functions of the other scripts, it also generates the `vt_ip_lookup.json`, `ii_ip_lookup.json`, `ai_ip_lookup.json`, `vt_file_lookup.json`, and `vt_domain_lookup.json` files in the `osint_json` directory. Note that the output files are overwritten each time the script is run.
 
 ```bash
 python comment.py --ip 8.8.8.8
@@ -263,8 +264,8 @@ SOAP_auto_analysis:
 ```plaintext
 SOAP_auto_analysis:
 - Analyzed at 2024-08-26T11:20:33.845629+08:00.
-- VirusTotal Link: https://www.virustotal.com/gui/file/('fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37',)
-- Threat Label: hacktool.mimikatz/hacktoolx
+- VirusTotal Link: https://www.virustotal.com/gui/file/fb55414848281f804858ce188c3dc659d129e283bd62d58d34f6e6f568feab37
+- Name: mimikatz.exe
 - File Type: Win32 EXE
 - File flagged as potential threat by 64/79 VirusTotal vendors: Lionic, AVG, DrWeb, MicroWorld-eScan, FireEye, CAT-QuickHeal, Skyhigh, McAfee, Malwarebytes, VIPRE, Sangfor, CrowdStrike, Alibaba, K7GW, K7AntiVirus, Symantec, Elastic, ESET-NOD32, Cynet, APEX, Paloalto, ClamAV, Kaspersky, BitDefender, NANO-Antivirus, SUPERAntiSpyware, Avast, Tencent, Emsisoft, Zillya, TrendMicro, McAfeeD, SentinelOne, Trapmine, Sophos, Ikarus, Jiangmin, Webroot, Google, Antiy-AVL, Kingsoft, Microsoft, Gridinsoft, Xcitium, Arcabit, ViRobot, ZoneAlarm, GData, Varist, AhnLab-V3, ALYac, MAX, VBA32, Cylance, Panda, TrendMicro-HouseCall, Rising, Yandex, huorong, MaxSecure, Fortinet, Cybereason, DeepInstinct, alibabacloud
 ```
@@ -303,5 +304,5 @@ Recorded as at commit `ba388b8888f4517ec2c6791f978daadc021cbb22`.
 
 ## Excluded
 
-- [ ] SIEM integration (not public)
-- [ ] Excel user attributes query (not public)
+- [x] SIEM integration (not public)
+- [x] Excel user attributes query (not public)

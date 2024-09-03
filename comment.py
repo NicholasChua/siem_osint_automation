@@ -1,16 +1,16 @@
-import datetime
-import ipaddress
-import vt_ip_osint as vti
+#!/usr/bin/env python3
+
+import vt_osint as vt
 import ii_ip_osint as ii
 import ai_ip_osint as ai
-import vt_file_osint as vtf
-import vt_domain_osint as vtd
-
 
 # Internal imports
 from common.helper_functions import (
     add_argparser_arguments,
+    calculate_iso_time,
     hash_file,
+    hash_input_validation,
+    ip_input_validation,
 )
 
 
@@ -37,9 +37,7 @@ def format_comment(
     comment = ["SOAP_auto_analysis:"]
 
     # Get the current timestamp in ISO 8601 format and print it
-    timestamp = datetime.datetime.now(
-        datetime.timezone(datetime.timedelta(hours=8))
-    ).isoformat()
+    timestamp = calculate_iso_time(timestamp_format=1, timezone=8)["current_time"]
 
     # Initialize the comment list with the timestamp
     comment += [f"- Analyzed at {timestamp}."]
@@ -110,10 +108,11 @@ def format_comment(
 
     if vt_file_osint:
         try:
+            file_hash = "".join(vt_file_osint["sha256"])
             comment += [
-                f"- VirusTotal Link: https://www.virustotal.com/gui/file/{vt_file_osint['sha256']}"
+                f"- VirusTotal Link: https://www.virustotal.com/gui/file/{file_hash}"
             ]
-            comment += [f"- Threat Label: {vt_file_osint['threat_label']}"]
+            comment += [f"- Name: {vt_file_osint['name']}"]
             comment += [f"- File Type: {vt_file_osint['file_type']}"]
             # Check for vendors that detected the IP address as malicious
             if vt_file_osint["vendors_detected_malicious"]:
@@ -174,6 +173,105 @@ def format_comment(
     return commentStr
 
 
+def combined_ip_osint(input_ip: str) -> str:
+    """Function to use format_comment to combine the IP OSINT details from VirusTotal, ipinfo.io and AbuseIPDB into a comment.
+
+    Args:
+        input_ip: The IP address to lookup.
+
+    Returns:
+        str: A formatted comment with the IP OSINT details. Each detail is on a new line with a '- ' prefix and ends with a newline character.
+    """
+    # Perform VT IP lookup
+    try:
+        success_vt = vt.vt_ip_lookup(input_ip=input_ip)
+        if success_vt:
+            vt_ip_osint = vt.vt_check_ip()
+        else:
+            print("Error looking up the IP on VirusTotal.")
+            vt_ip_osint = {}
+    except:
+        print("Error looking up the IP on VirusTotal.")
+        vt_ip_osint = {}
+
+    # Perform ipinfo.io IP lookup
+    try:
+        success_ii = ii.ii_ip_lookup(input_ip=input_ip)
+        if success_ii:
+            ii_ip_osint = ii.ii_check_ip()
+        else:
+            print("Error looking up the IP on ipinfo.io.")
+            ii_ip_osint = {}
+    except:
+        print("Error looking up the IP on ipinfo.io.")
+        ii_ip_osint = {}
+
+    # Perform AbuseIPDB IP lookup
+    try:
+        success_ai = ai.ai_ip_lookup(input_ip=input_ip)
+        if success_ai:
+            ai_ip_osint = ai.ai_check_ip()
+        else:
+            print("Error looking up the IP on AbuseIPDB.")
+            ai_ip_osint = {}
+    except:
+        print("Error looking up the IP on AbuseIPDB.")
+        ai_ip_osint = {}
+
+    # Pass the dictionaries to the format_comment function
+    comment = format_comment(
+        vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint, ai_ip_osint=ai_ip_osint
+    )
+
+    # Return the comment
+    return comment
+
+
+def malware_osint_comment(malware_file: str = None, malware_hash: str = None) -> str:
+    """Function to use format_comment to combine the file OSINT details from VirusTotal into a comment.
+
+    Args:
+        malware_file: The malware file to lookup. Default is None.
+        malware_hash: The malware hash to lookup. Default is None.
+
+    Returns:
+        str: A formatted comment with the file OSINT details. Each detail is on a new line with a '- ' prefix and ends with a newline character.    
+    """
+    # Convert the malware file to a SHA-256 hash first if malware_file is provided
+    if malware_file and not malware_hash:
+        malware_hash = hash_file(malware_file, "sha256")
+
+    # Perform the VirusTotal file lookup
+    success = vt.vt_file_lookup(input_hash=malware_hash)
+    if success:
+        vt_file_osint = vt.vt_check_file()
+        comment = format_comment(vt_file_osint=vt_file_osint)
+    else:
+        comment = "Error looking up the file on VirusTotal. The file might not have been uploaded to VirusTotal yet."
+
+    return comment
+
+
+def domain_osint_comment(input_domain: str) -> str:
+    """Function to use format_comment to combine the domain OSINT details from VirusTotal into a comment.
+
+    Args:
+        input_domain: The domain to lookup.
+
+    Returns:
+        str: A formatted comment with the domain OSINT details. Each detail is on a new line with a '- ' prefix and ends with a newline character.
+    """
+    # Perform the VirusTotal domain lookup
+    success = vt.vt_domain_lookup(input_domain=input_domain)
+    if success:
+        vt_domain_osint = vt.vt_check_domain()
+        comment = format_comment(vt_domain_osint=vt_domain_osint)
+    else:
+        comment = "Error looking up the domain on VirusTotal."
+
+    return comment
+
+
 def main():
     # Set up argparser with arguments
     args = add_argparser_arguments(
@@ -186,96 +284,54 @@ def main():
     )
 
     # Retrieve values from the command line arguments
-    ip_address = args.ip
-    malware_file = args.malware_file
-    malware_hash = args.malware_hash
-    domain = args.domain
+    input_values_dict = vars(args)
 
-    # Perform input validation of IP address using built-in ipaddress module
-    if ip_address:
-        try:
-            ipaddress.ip_address(ip_address)
-        except ValueError:
-            print("Invalid IP address. Please provide a valid IP address.")
-            exit(1)
+    # Perform input validation of IP address and malware hash
+    if input_values_dict["ip"]:
+        ip_validation = ip_input_validation(input_values_dict["ip"])
+        if not ip_validation:
+            raise ValueError("Invalid IP address.")
+    if input_values_dict["malware_hash"]:
+        hash_validation = hash_input_validation(input_values_dict["malware_hash"])
+        if not hash_validation:
+            raise ValueError("Invalid hash or hash type.")
 
-    # Perform input validation of malware hash for sha256, sha1, and md5
-    if malware_hash:
-        if len(malware_hash) == 64:
-            # Valid SHA-256 hash
-            pass
-        elif len(malware_hash) == 40:
-            # Valid SHA-1 hash
-            pass
-        elif len(malware_hash) == 32:
-            # Valid MD5 hash
-            pass
-        else:
-            raise ValueError(
-                "The hash provided is not a valid SHA-256, SHA-1, or MD5 hash."
-            )
+    # Define mutually exclusive arguments
+    operation_fields = ["ip", "malware_file", "malware_hash", "domain"]
+    formatted_fields = [f"--{field}" for field in operation_fields]
+    mutually_exclusive_fields = [
+        field for field in operation_fields if input_values_dict.get(field)
+    ]
 
-    # Decision tree for the arguments
-    # Check if the IP address is provided with the malware file/hash or domain
-    if ip_address and (malware_file or malware_hash or domain):
-        raise ValueError(
-            "Please provide only one of --ip, --malware_file, --malware_hash, or --domain."
-        )
-    # If only the IP address is provided, perform the IP lookups
-    elif ip_address and not (malware_file or malware_hash or domain):
-        success_vt = vti.vt_ip_lookup(input_ip=ip_address)
-        success_ii = ii.ii_ip_lookup(input_ip=ip_address)
-        success_ai = ai.ai_ip_lookup(input_ip=ip_address)
+    # If none of the mutually exclusive fields are provided, raise an error
+    if not mutually_exclusive_fields:
+        raise ValueError(f"Please provide one of {', '.join(formatted_fields)}.")
 
-        # If the lookups are successful, proceed to checks and save results in dictionaries
-        # Otherwise, leave dictionaries empty to indicate failure
-        if success_vt:
-            vt_ip_osint = vti.vt_check_ip()
-        else:
-            vt_ip_osint = {}
-        if success_ii:
-            ii_ip_osint = ii.ii_check_ip()
-        else:
-            ii_ip_osint = {}
-        if success_ai:
-            ai_ip_osint = ai.ai_check_ip()
-        else:
-            ai_ip_osint = {}
+    # If more than one mutually exclusive field is provided, raise an error
+    elif len(mutually_exclusive_fields) > 1:
+        raise ValueError(f"Please provide only one of {', '.join(formatted_fields)}.")
 
-        # Pass the dictionaries to the format_comment function
-        comment = format_comment(
-            vt_ip_osint=vt_ip_osint, ii_ip_osint=ii_ip_osint, ai_ip_osint=ai_ip_osint
+    # If the IP address is provided, perform the IP lookups
+    elif input_values_dict["ip"]:
+        comment = combined_ip_osint(input_ip=input_values_dict["ip"])
+        print(comment)
+
+    # If the malware file or hash is provided, perform the VirusTotal file lookup
+    elif input_values_dict["malware_file"] or input_values_dict["malware_hash"]:
+        comment = malware_osint_comment(
+            malware_file=input_values_dict["malware_file"],
+            malware_hash=input_values_dict["malware_hash"],
         )
         print(comment)
-    # If the malware file or hash is provided, perform the VirusTotal file lookup
-    elif malware_file or malware_hash:
-        # Convert the malware file to a SHA-256 hash first if malware_file is provided
-        if malware_file and not malware_hash:
-            malware_hash = hash_file(malware_file, "sha256")
-        # Perform the VirusTotal file lookup
-        success = vtf.vt_file_lookup(input_hash=malware_hash)
-        if success:
-            vt_file_osint = vtf.vt_check_file()
-            comment = format_comment(vt_file_osint=vt_file_osint)
-            print(comment)
-        else:
-            print(
-                "Error looking up the file on VirusTotal. The file might not have been uploaded to VirusTotal yet."
-            )
+
     # If the domain is provided, perform the VirusTotal domain lookup
-    elif domain:
-        success = vtd.vt_domain_lookup(input_domain=domain)
-        if success:
-            vt_domain_osint = vtd.vt_check_domain()
-            comment = format_comment(vt_domain_osint=vt_domain_osint)
-            print(comment)
-        else:
-            print("Error with the VirusTotal API call.")
-    # If no or invalid arguments are provided, print an error
+    elif input_values_dict["domain"]:
+        comment = domain_osint_comment(input_domain=input_values_dict["domain"])
+        print(comment)
+
+    # Default case if none of the above conditions are met
     else:
-        raise ValueError(
-            "Please provide one of --ip, --malware_file, --malware_hash, or --domain."
-        )
+        raise ValueError(f"Please provide one of {', '.join(formatted_fields)}.")
 
 
 if __name__ == "__main__":
